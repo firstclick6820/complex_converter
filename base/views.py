@@ -1,11 +1,19 @@
 
 # Import modules from django
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 
+
+from django.core.files import File
 # rest framework
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
+
+
+
+from pathlib import Path
+import os
+
 
 
 # Import Json module
@@ -16,7 +24,7 @@ from num2words import num2words
 
 # import gTTS module to convert text into speech
 from gtts import gTTS
-
+from tempfile import TemporaryFile
 
 
 # Home Page Provide URL Tree and Basic Usage Information
@@ -26,9 +34,9 @@ def home(request):
     context = {
         "Home": "Welcome to Converter API Application",
          "URLs": {
-             "Numbers To Words": '',
+             "Numbers To Words": '/numbers_to_words/23235532323/',
              "Text To Speech" : '',
-             "Numbers To Speech" : '',
+             "Numbers To Speech" : '/numbers_to_speech/2232323/',
              "Speech To Text" : '',
          }
     }
@@ -58,4 +66,42 @@ def numbers_to_words(request, number):
     
     
     
+    return JsonResponse({"Error": "Invalid Param!", "Solution": "Provide Integer Number (22222) only."}, safe=False)
+
+
+
+
+
+
+
+# convert numbers to speech
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def numbers_to_speech(request, number):
+    # now hard code the language but in future make it dynamic let the user to choose the language
+    language = 'en'
+
+    
+    
+    if type(number) == int:
+        target_number = int(number)
+        
+        text_result = num2words(target_number)
+
+        speech = gTTS(text=text_result, lang=language, slow=False)
+        speech.save('default.mp3')
+        new_path = './{}'.format('default.mp3')
+
+        converted_audiofile = File(
+            file=open(new_path, 'rb'),
+                name=Path(new_path))
+        
+        
+        converted_audiofile.name = Path(new_path).name
+        converted_audiofile.size = os.path.getsize(new_path)
+        return FileResponse(converted_audiofile, as_attachment=True)
+    
+    
+    
+
     return JsonResponse({"Error": "Invalid Param!", "Solution": "Provide Integer Number (22222) only."}, safe=False)
