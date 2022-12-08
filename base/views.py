@@ -34,7 +34,7 @@ def home(request):
     context = {
         "Home": "Welcome to Converter API Application",
          "URLs": {
-             "Numbers To Words": '/numbers_to_words/23235532323/', 
+             "Numbers To Words": '/numbers_to_words/23235532323/cardinal/', 
              "Get Languages": '/get_languages/',
              "Text To Speech" : '/text_to_speech/text/en/',
              "Numbers To Speech" : '/numbers_to_speech/2232323/en/',
@@ -52,12 +52,19 @@ def home(request):
 # Here We Convert taken number from the user and convert it to words or simply can say to text.
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def numbers_to_words(request, number):
+def numbers_to_words(request, number, to_format = ""):
     
+    # By Default num2words module convert any number to cardinal, but the library support various formats such as ordinal, oridnal_num , currency and year,
+    # So if the user spacify the format then will convert to that specific format, otherwise we will go with default.
+    to_convert = 'cardinal'
+    
+    if to_format and type(to_format) == str:
+        to_convert = to_format
+   
     if type(number) == int:
         target_number = int(number)
         
-        result = num2words(target_number)
+        result = num2words(target_number, to=to_convert)
 
         context = {
             "Provided Number": number,
