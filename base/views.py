@@ -23,7 +23,7 @@ import json
 from num2words import num2words
 
 # import gTTS module to convert text into speech
-from gtts import gTTS
+from gtts import gTTS, langs
 from tempfile import TemporaryFile
 
 
@@ -34,9 +34,10 @@ def home(request):
     context = {
         "Home": "Welcome to Converter API Application",
          "URLs": {
-             "Numbers To Words": '/numbers_to_words/23235532323/',
-             "Text To Speech" : '/text_to_speech/text/',
-             "Numbers To Speech" : '/numbers_to_speech/2232323/',
+             "Numbers To Words": '/numbers_to_words/23235532323/', 
+             "Get Languages": '/get_languages/',
+             "Text To Speech" : '/text_to_speech/text/en/',
+             "Numbers To Speech" : '/numbers_to_speech/2232323/en/',
              "Speech To Text" : '',
          }
     }
@@ -77,11 +78,12 @@ def numbers_to_words(request, number):
 # convert numbers to speech
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def numbers_to_speech(request, number):
+def numbers_to_speech(request, number, lang = ''):
     # now hard code the language but in future make it dynamic let the user to choose the language
     language = 'en'
 
-    
+    if lang and type(lang) == str:
+        language = lang
     
     if type(number) == int:
         target_number = int(number)
@@ -113,12 +115,15 @@ def numbers_to_speech(request, number):
 # convert text to speech
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def text_to_speech(request, text):
+def text_to_speech(request, text, lang = ""):
     # now hard code the language but in future make it dynamic let the user to choose the language
     language = 'en'
-
     
     
+    
+    # Check if the user spicify the language or not
+    if lang and type(lang) == str:
+        language = lang
     if type(text) == str:
         target_text = str(text)
         
@@ -141,3 +146,16 @@ def text_to_speech(request, text):
     
 
     return JsonResponse({"Error": "Invalid Param!", "Solution": "Provide Integer Number (22222) only."}, safe=False)
+
+
+
+
+
+
+# Get Languages
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def get_languages(request):
+    
+    if request.method == "GET":
+        return JsonResponse(langs._langs, safe=False)
