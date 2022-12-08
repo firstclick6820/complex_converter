@@ -64,7 +64,13 @@ def numbers_to_words(request, number, to_format = ""):
     if type(number) == int:
         target_number = int(number)
         
-        result = num2words(target_number, to=to_convert)
+        
+        try:
+            result = num2words(target_number, to=to_convert)
+        
+        except NotImplementedError:
+            result = num2words(target_number, to='en')
+      
 
         context = {
             "Provided Number": number,
